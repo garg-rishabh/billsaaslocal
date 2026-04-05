@@ -19,9 +19,6 @@ spring:
       hibernate:
         format_sql: false
         multiTenancy: SCHEMA
-        tenant_identifier_resolver: com.smbsaas.common.tenant.TenantIdentifierResolver
-        multi_tenant_connection_provider: com.smbsaas.common.tenant.MultiTenantConnectionProviderImpl
-
   flyway:
     enabled: true
     locations: classpath:db/migration
