@@ -31,3 +31,12 @@ build/
 
 ### VS Code ###
 .vscode/
+/.env
+/.env.example
+/.gitattributes
+/[Help
+/.mvn/wrapper/maven-wrapper.properties
+/mvn
+/mvnw
+/mvnw.cmd
+/[Help
