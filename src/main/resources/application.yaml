@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: billsaas
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/bill_saas}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+    hikari:
+      maximum-pool-size: ${DB_MAX_POOL_SIZE:10}
+      minimum-idle: ${DB_MIN_IDLE:2}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate   # ❗ NEVER update/create
+    properties:
+      hibernate:
+        format_sql: false
+        multiTenancy: SCHEMA
+        tenant_identifier_resolver: com.smbsaas.common.tenant.TenantIdentifierResolver
+        multi_tenant_connection_provider: com.smbsaas.common.tenant.MultiTenantConnectionProviderImpl
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:dev-secret}
+    expiration: ${JWT_EXPIRATION:86400000}
+
+  s3:
+    endpoint: ${S3_ENDPOINT:http://localhost:4566}
+    access-key: ${AWS_ACCESS_KEY:test}
+    secret-key: ${AWS_SECRET_KEY:test}
+    region: ${AWS_REGION:ap-south-1}
