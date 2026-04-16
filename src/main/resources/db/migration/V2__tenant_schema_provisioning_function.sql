@@ -185,42 +185,85 @@ EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_customers_phone ON %I.customer
 EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_invoice_number ON %I.invoices(invoice_number)', schema_name, schema_name);
 
 -- =========================
--- FOREIGN KEYS
+-- FOREIGN KEYS (FINAL CORRECT)
 -- =========================
+
+-- inventory_items → categories
+BEGIN
 EXECUTE format('
         ALTER TABLE %I.inventory_items
-        ADD CONSTRAINT IF NOT EXISTS fk_inventory_category
-        FOREIGN KEY (category_id) REFERENCES %I.categories(id)', schema_name, schema_name);
+        ADD CONSTRAINT fk_inventory_category
+        FOREIGN KEY (category_id) REFERENCES %I.categories(id)
+    ', schema_name, schema_name);
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END;
 
+-- inventory_items → suppliers
+BEGIN
 EXECUTE format('
         ALTER TABLE %I.inventory_items
-        ADD CONSTRAINT IF NOT EXISTS fk_inventory_supplier
-        FOREIGN KEY (supplier_id) REFERENCES %I.suppliers(id)', schema_name, schema_name);
+        ADD CONSTRAINT fk_inventory_supplier
+        FOREIGN KEY (supplier_id) REFERENCES %I.suppliers(id)
+    ', schema_name, schema_name);
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END;
 
+-- stock_movements → inventory_items
+BEGIN
 EXECUTE format('
         ALTER TABLE %I.stock_movements
-        ADD CONSTRAINT IF NOT EXISTS fk_stock_item
-        FOREIGN KEY (item_id) REFERENCES %I.inventory_items(id)', schema_name, schema_name);
+        ADD CONSTRAINT fk_stock_item
+        FOREIGN KEY (item_id) REFERENCES %I.inventory_items(id)
+    ', schema_name, schema_name);
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END;
 
+-- invoices → customers
+BEGIN
 EXECUTE format('
         ALTER TABLE %I.invoices
-        ADD CONSTRAINT IF NOT EXISTS fk_invoice_customer
-        FOREIGN KEY (customer_id) REFERENCES %I.customers(id)', schema_name, schema_name);
+        ADD CONSTRAINT fk_invoice_customer
+        FOREIGN KEY (customer_id) REFERENCES %I.customers(id)
+    ', schema_name, schema_name);
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END;
 
+-- invoice_line_items → invoices
+BEGIN
 EXECUTE format('
         ALTER TABLE %I.invoice_line_items
-        ADD CONSTRAINT IF NOT EXISTS fk_line_invoice
-        FOREIGN KEY (invoice_id) REFERENCES %I.invoices(id)', schema_name, schema_name);
+        ADD CONSTRAINT fk_line_invoice
+        FOREIGN KEY (invoice_id) REFERENCES %I.invoices(id)
+    ', schema_name, schema_name);
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END;
 
+-- invoice_line_items → inventory_items
+BEGIN
 EXECUTE format('
         ALTER TABLE %I.invoice_line_items
-        ADD CONSTRAINT IF NOT EXISTS fk_line_item
-        FOREIGN KEY (item_id) REFERENCES %I.inventory_items(id)', schema_name, schema_name);
+        ADD CONSTRAINT fk_line_item
+        FOREIGN KEY (item_id) REFERENCES %I.inventory_items(id)
+    ', schema_name, schema_name);
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END;
 
+-- payments → invoices
+BEGIN
 EXECUTE format('
         ALTER TABLE %I.payments
-        ADD CONSTRAINT IF NOT EXISTS fk_payment_invoice
-        FOREIGN KEY (invoice_id) REFERENCES %I.invoices(id)', schema_name, schema_name);
+        ADD CONSTRAINT fk_payment_invoice
+        FOREIGN KEY (invoice_id) REFERENCES %I.invoices(id)
+    ', schema_name, schema_name);
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END;
 
 END;
 $$;

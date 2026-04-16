@@ -1,12 +1,13 @@
 package org.product.billsaas.common.config;
 
-import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.cfg.AvailableSettings;
 import org.product.billsaas.common.multitenancy.TenantConnectionProvider;
 import org.product.billsaas.common.multitenancy.TenantSchemaResolver;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
@@ -21,7 +22,9 @@ public class JpaConfig {
     private final TenantSchemaResolver tenantResolver;
 
     @Bean
-    public EntityManagerFactory entityManagerFactory(EntityManagerFactoryBuilder builder) {
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(
+            EntityManagerFactoryBuilder builder
+    ) {
 
         Map<String, Object> properties = new HashMap<>();
 
@@ -33,7 +36,6 @@ public class JpaConfig {
                 .dataSource(dataSource)
                 .packages("org.product.billsaas")
                 .properties(properties)
-                .build()
-                .getObject();
+                .build();
     }
 }

@@ -29,7 +29,7 @@ spring:
 
 app:
   jwt:
-    secret: ${JWT_SECRET:dev-secret}
+    secret: ${JWT_SECRET:bXktc3VwZXItc2VjdXJlLWtleS0xMjM0NTY3ODkwMTIzNDU2}
     expiration: ${JWT_EXPIRATION:86400000}
 
   s3:
