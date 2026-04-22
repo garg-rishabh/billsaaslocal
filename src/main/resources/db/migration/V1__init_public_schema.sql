@@ -1,65 +1,67 @@
--- Enable UUID generation
-CREATE
-EXTENSION IF NOT EXISTS pgcrypto;
+-- ============================================
+-- V1: PUBLIC SCHEMA (UPDATED)
+-- ============================================
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- =========================
--- TENANTS TABLE (PUBLIC)
+-- USERS (GLOBAL IDENTITY)
 -- =========================
-CREATE TABLE tenants
-(
-    id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+CREATE TABLE IF NOT EXISTS users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
-    name           VARCHAR(255) NOT NULL,
-    slug           VARCHAR(100) NOT NULL UNIQUE,
+    phone VARCHAR(20) NOT NULL UNIQUE,
+    email VARCHAR(255),
 
-    gstin          VARCHAR(50),
-    phone          VARCHAR(20),
-    email          VARCHAR(255),
+    password_hash TEXT NOT NULL,
 
-    plan_type      VARCHAR(50)      DEFAULT 'FREE',
+    is_active BOOLEAN DEFAULT TRUE,
+    last_login    TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+CREATE UNIQUE INDEX IF NOT EXISTS unique_email
+    ON users(email)
+    WHERE email IS NOT NULL;
+
+-- =========================
+-- TENANTS (BUSINESS)
+-- =========================
+CREATE TABLE IF NOT EXISTS tenants (
+                                       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    name VARCHAR(255) NOT NULL,
+
+    slug VARCHAR(255) NOT NULL UNIQUE,
+
+    gstin VARCHAR(50),
 
     db_schema_name VARCHAR(100) NOT NULL UNIQUE,
 
-    is_active      BOOLEAN          DEFAULT TRUE,
+    is_active BOOLEAN DEFAULT TRUE,
 
-    created_at     TIMESTAMPTZ      DEFAULT NOW()
-);
+    created_at TIMESTAMPTZ DEFAULT NOW()
+    );
 
--- Index for fast lookup
-CREATE INDEX idx_tenants_slug ON tenants (slug);
-
+CREATE UNIQUE INDEX IF NOT EXISTS unique_gstin
+    ON tenants(gstin)
+    WHERE gstin IS NOT NULL;
 
 -- =========================
--- USERS TABLE (PUBLIC)
+-- USER ↔ TENANT MAPPING
 -- =========================
-CREATE TABLE users
-(
-    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+CREATE TABLE IF NOT EXISTS user_tenants (
+                                            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
-    tenant_id     UUID         NOT NULL,
+    user_id UUID NOT NULL,
+    tenant_id UUID NOT NULL,
 
-    email         VARCHAR(255) NOT NULL,
-    password_hash TEXT         NOT NULL,
+    role VARCHAR(50) NOT NULL,
 
-    full_name     VARCHAR(255),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
 
-    role          VARCHAR(50)      DEFAULT 'USER',
+    UNIQUE(user_id, tenant_id),
 
-    is_active     BOOLEAN          DEFAULT TRUE,
-
-    last_login    TIMESTAMPTZ,
-
-    created_at    TIMESTAMPTZ      DEFAULT NOW(),
-
-    CONSTRAINT fk_users_tenant
-        FOREIGN KEY (tenant_id)
-            REFERENCES tenants (id)
-            ON DELETE CASCADE
-);
-
--- UNIQUE constraint per tenant
-ALTER TABLE users
-    ADD CONSTRAINT uq_users_tenant_email UNIQUE (tenant_id, email);
-
--- Index for fast queries
-CREATE INDEX idx_users_tenant_email ON users (tenant_id, email);
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+    );

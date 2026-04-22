@@ -9,5 +9,6 @@ import java.util.UUID;
 
 @Repository
 public interface TenantRepository extends JpaRepository<Tenant, UUID> {
-    Optional<Tenant> findBySlug(String slug);
+
+    boolean existsByDbSchemaName(String schema);
 }

@@ -5,27 +5,23 @@ import lombok.*;
 
 import java.time.Instant;
 import java.util.UUID;
-
 @Entity
-@Table(name = "tenants")
+@Table(name = "user_tenants",
+       uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "tenant_id"}))
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-public class Tenant {
+public class UserTenant {
 
     @Id
     @GeneratedValue
     private UUID id;
 
-    private String name;
+    @Column(name = "user_id")
+    private UUID userId;
 
-    @Column(unique = true)
-    private String slug;
+    @Column(name = "tenant_id")
+    private UUID tenantId;
 
-    private String gstin;
-
-    @Column(name = "db_schema_name", unique = true)
-    private String dbSchemaName;
-
-    private Boolean isActive;
+    private String role;
 
     private Instant createdAt;
 }
